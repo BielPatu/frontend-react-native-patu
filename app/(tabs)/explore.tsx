@@ -1,13 +1,10 @@
 import { Image } from 'expo-image';
-import { Button, Platform, StyleSheet, View } from 'react-native';
+import { Button, StyleSheet, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-import { Text, TextInput } from 'react-native-gesture-handler';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { TextInput } from 'react-native-gesture-handler';
 
 export default function HomeScreen() {
   const[nome, setNome] = useState('');

@@ -1,17 +1,15 @@
 import { Image } from 'expo-image';
-import { Button, Platform, StyleSheet, View } from 'react-native';
+import { Button, StyleSheet, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-import { Text, TextInput } from 'react-native-gesture-handler';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { TextInput } from 'react-native-gesture-handler';
 
 export default function HomeScreen() {
-  const[nome, setNome] = useState(' ');
-  const[email, setEmail] = useState(' ');
+  const[nome, setNome] = useState('');
+  const[email, setEmail] = useState('');
+  const[password, setPassword] = useState('');
 
 
   function handleSubmit() 
@@ -34,18 +32,18 @@ export default function HomeScreen() {
       <ThemedText style={styles.semiTitle} >Nome</ThemedText>
       <TextInput
         style={styles.input}
-        placeholder="Enter your name"
-        value={nome}
-        onChangeText={setNome}
+        placeholder="Inserir email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
       />
 
       <ThemedText style={styles.semiTitle}>Email</ThemedText>
       <TextInput
         style={styles.input}
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
+        placeholder="Inserir senha"
+        value={password}
+        onChangeText={setPassword}
       />
 
       <Button title="Entrar" onPress={handleSubmit}/>
