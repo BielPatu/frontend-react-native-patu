@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/themed-text";
+import axios from "axios";
 import { Checkbox } from 'expo-checkbox';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 
 
@@ -8,8 +9,8 @@ import { Image, StyleSheet, Text, View } from "react-native";
 export default function toDoHome() {
     const[lists, setLists] = useState();
     const[list, setList] = useState();
-    const[isChecked, setChecked] = useState([]  );
-
+    const[isChecked, setChecked] = useState([]);
+    const[name, setName] = useState();
 
     function selectList(){
 
@@ -18,82 +19,95 @@ export default function toDoHome() {
 
     function loadLists()
     {
-        ///Ainda tenho que Setar
+      const lists = axios.get('http://localhost:3000/to-do-list/')
+      .then(response => {
+        console.log(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
     }
-    function handleBoxChange()
-    {
 
+
+
+     useEffect(() => {
+      loadLists();
+
+    return () => {
+    };
+  }, []);
+
+      return(
+          <View>
+              <View style={styles.mainContainer}>
+
+                  <View style={styles.statsContainer}>
+                              <View style={{alignItems: 'center'}}>
+                      <ThemedText>User</ThemedText>
+
+                      <View>
+                      <Image 
+                          source={'https://preview.redd.it/jonkler-bom-dia-v0-l7spc07a1kqd1.jpeg?auto=webp&s=2611c954e108166dd5428e1acac95d7296693c06'} 
+                          style={{ width: 100, height: 100, borderRadius: 50 }} 
+                      />
+                      </View>
+                              <ThemedText>Coringa_Silva</ThemedText>
+                              </View>
+                      
+
+
+
+
+
+
+                  </View>
+                  <View style={styles.statsContainer}>
+                      <ThemedText>Stats</ThemedText>
+                      <Text>Completed: 10/14</Text>
+                      <Text>Pending: 4</Text>
+                      <Text>Completion Percentage: 71%</Text>
+                      
+                      
+                      
+                      
+                  </View>
+
+              </View>
+
+
+
+
+
+              <View style={styles.questContainer}>
+                  <Text style={styles.title}>Quests</Text>
+              </View>
+              <View>
+                  <ThemedText style={styles.activeQuests}>Quests Disponiveis 1/1</ThemedText>
+                  <View style={styles.container}>
+                      <View>
+                          <ThemedText>Lavar Louças</ThemedText>
+                          <Text>As louças precisam ser lavadas até 17:40</Text>
+                      </View>
+                      <View style={styles.checkBoxLocation}>
+                          <Checkbox
+                          style={styles.checkbox}
+                          value={isChecked}
+                          onValueChange={setChecked}
+                          color={isChecked ? '#4630EB' : undefined}
+                          />
+                      </View>
+                      {lists.map((lists) => ())}
+                  </View>
+              
+              </View>
+
+
+          </View>
+      );
     }
 
 
-    return (
-        <View>
-            <View style={styles.mainContainer}>
 
-                <View style={styles.statsContainer}>
-                            <View style={{alignItems: 'center'}}>
-                    <ThemedText>User</ThemedText>
-
-                    <View>
-                    <Image 
-                        source={'https://preview.redd.it/jonkler-bom-dia-v0-l7spc07a1kqd1.jpeg?auto=webp&s=2611c954e108166dd5428e1acac95d7296693c06'} 
-                        style={{ width: 100, height: 100, borderRadius: 50 }} 
-                    />
-                    </View>
-                            <ThemedText>Coringa_Silva</ThemedText>
-                            </View>
-                    
-
-
-
-
-
-
-                </View>
-                <View style={styles.statsContainer}>
-                    <ThemedText>Stats</ThemedText>
-                    <Text>Completed: 10/14</Text>
-                    <Text>Pending: 4</Text>
-                    <Text>Completion Percentage: 71%</Text>
-                    
-                    
-                    
-                    
-                </View>
-
-            </View>
-
-
-
-
-
-            <View style={styles.questContainer}>
-                <Text style={styles.title}>Quests</Text>
-            </View>
-            <View>
-                <ThemedText style={styles.activeQuests}>Quests Disponiveis 1/1</ThemedText>
-                <View style={styles.container}>
-                    <View>
-                        <ThemedText>Lavar Louças</ThemedText>
-                        <Text>As louças precisam ser lavadas até 17:40</Text>
-                    </View>
-                    <View style={styles.checkBoxLocation}>
-                        <Checkbox
-                        style={styles.checkbox}
-                        value={isChecked}
-                        onValueChange={setChecked}
-                        color={isChecked ? '#4630EB' : undefined}
-                        />
-                    </View>
-                </View>
-            
-            </View>
-
-
-        </View>
-    );
-
-}
 
 const styles = StyleSheet.create({
   container: 
