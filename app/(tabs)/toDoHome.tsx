@@ -2,31 +2,45 @@ import { ThemedText } from "@/components/themed-text";
 import axios from "axios";
 import { Checkbox } from 'expo-checkbox';
 import { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 
 
 export default function toDoHome() {
-    const[lists, setLists] = useState();
+    const[lists, setLists] = useState([]);
     const[list, setList] = useState();
-    const[isChecked, setChecked] = useState([]);
     const[name, setName] = useState();
+    const [isChecked, setChecked] = useState({});
 
     function selectList(){
 
     }
 
 
-    function loadLists()
-    {
-      const lists = axios.get('http://localhost:3000/to-do-list/')
-      .then(response => {
-        console.log(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-    }
+    const activeQuestsCount = lists.filter(list => !isChecked[list.id]).length;
+
+
+
+    const toggleCheckbox = (id) => {
+      setChecked(prevState => ({
+        ...prevState,
+        [id]: !prevState[id]
+      }));
+    };
+
+
+    function loadLists() {
+    axios.get('http://localhost:3000/to-do-list/')
+    .then(response => {
+      console.log(response.data);
+      setLists(response.data);  // <- Set the state
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+}
+
 
 
 
@@ -38,7 +52,8 @@ export default function toDoHome() {
   }, []);
 
       return(
-          <View>
+        <SafeAreaProvider>
+          <View style={styles.father}>
               <View style={styles.mainContainer}>
 
                   <View style={styles.statsContainer}>
@@ -82,27 +97,34 @@ export default function toDoHome() {
                   <Text style={styles.title}>Quests</Text>
               </View>
               <View>
-                  <ThemedText style={styles.activeQuests}>Quests Disponiveis 1/1</ThemedText>
-                  <View style={styles.container}>
-                      <View>
-                          <ThemedText>Lavar Louças</ThemedText>
-                          <Text>As louças precisam ser lavadas até 17:40</Text>
+                  <ThemedText style={styles.activeQuests}>Quest disponiveis {activeQuestsCount}/{lists.length}</ThemedText>
+                  <ScrollView>
+                  <View>
+                    {lists && lists.map((list, index) => (
+                      <View key={list.id} style={styles.container}>
+                        <ThemedText>{list.title}</ThemedText>
+                        <View style={styles.checkBoxLocation}>
+                          <Checkbox style={styles.checkBoxLocation}
+                          value={isChecked[list.id] || false}
+                          onValueChange={() => toggleCheckbox(list.id)}
+                          color={isChecked[list.id] ? '#4630EB' : undefined}/>
+
+
+                        </View>
                       </View>
-                      <View style={styles.checkBoxLocation}>
-                          <Checkbox
-                          style={styles.checkbox}
-                          value={isChecked}
-                          onValueChange={setChecked}
-                          color={isChecked ? '#4630EB' : undefined}
-                          />
-                      </View>
-                      {lists.map((lists) => ())}
+                    ))
+                    }
+
+
+
+
                   </View>
-              
+              </ScrollView>
               </View>
 
 
           </View>
+          </SafeAreaProvider>
       );
     }
 
@@ -110,6 +132,10 @@ export default function toDoHome() {
 
 
 const styles = StyleSheet.create({
+  father:
+  {
+    overflow: 'scroll'
+  },
   container: 
   {
     display: 'flex',
@@ -126,7 +152,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     right: 15,
     position: 'absolute',
-    top: 25
+    top: '35%'
   },
   mainContainer:
   {
