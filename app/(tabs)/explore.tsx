@@ -30,7 +30,7 @@ export default function HomeScreen() {
         />
       }>
       <View style={styles.container}>
-      <ThemedText style={styles.semiTitle} >Nome</ThemedText>
+      <ThemedText style={styles.semiTitle}>Nome</ThemedText>
       <TextInput
         style={styles.input}
         placeholder="Coloque seu nome"

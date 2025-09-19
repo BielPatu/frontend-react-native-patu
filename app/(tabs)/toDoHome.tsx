@@ -1,8 +1,10 @@
 import { ThemedText } from "@/components/themed-text";
 import axios from "axios";
 import { Checkbox } from 'expo-checkbox';
+import * as React from 'react';
 import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { MD3Colors, ProgressBar } from 'react-native-paper';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 
@@ -17,10 +19,12 @@ export default function toDoHome() {
 
     }
 
-
+    
     const activeQuestsCount = lists.filter(list => !isChecked[list.id]).length;
 
-
+    const MyComponent = () => (
+    <ProgressBar progress={0.5} color={MD3Colors.error50} />
+);
 
     const toggleCheckbox = (id) => {
       setChecked(prevState => ({
@@ -40,12 +44,26 @@ export default function toDoHome() {
       console.error('Error fetching data:', error);
     });
 }
+    function loadUser() {
+    axios.get('http://localhost:3000/user/1')
+    .then(response => {
+      console.log(response.data);
+      setName(response.data.name);  
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+}
+
+
+    
 
 
 
 
      useEffect(() => {
       loadLists();
+      loadUser();
 
     return () => {
     };
@@ -56,9 +74,9 @@ export default function toDoHome() {
           <View style={styles.father}>
               <View style={styles.mainContainer}>
 
-                  <View style={styles.statsContainer}>
+                  <View style={styles.statsContainerUser}>
                               <View style={{alignItems: 'center'}}>
-                      <ThemedText>User</ThemedText>
+                      <ThemedText>{}</ThemedText>
 
                       <View>
                       <Image 
@@ -66,7 +84,7 @@ export default function toDoHome() {
                           style={{ width: 100, height: 100, borderRadius: 50 }} 
                       />
                       </View>
-                              <ThemedText>Coringa_Silva</ThemedText>
+                              <ThemedText>{name}</ThemedText>
                               </View>
                       
 
@@ -78,9 +96,10 @@ export default function toDoHome() {
                   </View>
                   <View style={styles.statsContainer}>
                       <ThemedText>Stats</ThemedText>
-                      <Text>Completed: 10/14</Text>
-                      <Text>Pending: 4</Text>
-                      <Text>Completion Percentage: 71%</Text>
+                      <Text>Level - 5</Text>
+                      <Text>Completion Rate: 71%</Text>
+                      <MyComponent/>
+
                       
                       
                       
@@ -167,13 +186,22 @@ const styles = StyleSheet.create({
     marginTop: 50,
     
   },
+  statsContainerUser: 
+  {
+   display: 'flex',
+   flexDirection: 'column',
+   justifyContent: 'center',
+   alignItems: 'center',
+   width: '50%',
+  },
   statsContainer: 
   {
    display: 'flex',
    flexDirection: 'column',
    justifyContent: 'center',
    alignItems: 'center',
-   width: '50%'
+   width: '50%',
+   top: 100
   },
   title: {
     fontSize: 24,
