@@ -1,106 +1,104 @@
-import { Image } from 'expo-image';
-import { Button, StyleSheet, View } from 'react-native';
-
-import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { TextInput } from 'react-native-gesture-handler';
+import { Button, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 export default function HomeScreen() {
-  const[nome, setNome] = useState('');
-  const[email, setEmail] = useState('');
-  const[password, setPassword] = useState('');
+  const router = useRouter(); 
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
 
-
-  function handleSubmit() 
-  {
-    console.log(nome);
-    console.log(email);
-  }  
-
+  function handleSubmit() {
+    console.log(nome, email, password, passwordConfirm);
+    router.push('/toDoHome');
+  }
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={'https://as1.ftcdn.net/jpg/03/16/06/18/1000_F_316061887_nCWfeJKqbIxgpaAkgce2lhAfXnAE06Te.jpg'}
-          style={styles.reactLogo}
+    <ScrollView style={styles.screen} contentContainerStyle={styles.screenContent}>
+      <Image
+        source={require('../../assets/images/quest-line-icon.png')}
+        style={styles.logo}
+        contentFit="contain"
+      />
+
+      <View style={styles.formCard}>
+        <ThemedText style={styles.label}>Email</ThemedText>
+        <TextInput
+          style={styles.input}
+          placeholder="Coloque seu email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
         />
-      }>
-      <View style={styles.container}>
-      <ThemedText style={styles.semiTitle} >Nome</ThemedText>
-      <TextInput
-        style={styles.input}
-        placeholder="Inserir email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
 
-      <ThemedText style={styles.semiTitle}>Email</ThemedText>
-      <TextInput
-        style={styles.input}
-        placeholder="Inserir senha"
-        value={password}
-        onChangeText={setPassword}
-      />
+        <ThemedText style={styles.label}>Senha</ThemedText>
+        <TextInput
+          style={styles.input}
+          placeholder="Coloque sua senha"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <Button title="Entrar" onPress={handleSubmit}/>
-    </View>
-
-
-      
-    </ParallaxScrollView>
+        <View style={styles.buttonWrapper}>
+          <Button title="Entrar" color="#4CAF50" onPress={handleSubmit} />
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  screen: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  screenContent: {
     alignItems: 'center',
-    gap: 8,
+    paddingVertical: 40,
+  },
+  logo: {
+    width: 450,
+    height: 250,
+    position: 'relative',
+  },
+  formCard: {
+    width: '90%',
+    backgroundColor: '#f5f5f5',
+    padding: 20,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 10,
+    textAlign: 'center',
+    marginBottom: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  label: {
+    fontWeight: 'bold',
+    marginBottom: 6,
+    marginTop: 12,
   },
-  reactLogo: {
-    height: '100%',
-    width: '100%',
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    
+  input: {
+    height: 45,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
   },
-  input: 
-  {
-    flexDirection: 'row',
-    alignItems: 'center',
-    margin: 20,
-    border: '1px solid #000',
-    borderRadius: '5px',
-    padding: '5px',
-    height: '100%',
-    width: '100%'
+  buttonWrapper: {
+    marginTop: 20,
+    borderRadius: 6,
+    overflow: 'hidden', 
   },
-  container: 
-  {
-    display: 'flex',
-    alignItems: 'center',
-    margin: 8,
-    padding: 10,
-    boxShadow: '0px 0px 10px #5a5a5aff',
-    borderRadius: '5px'
-  },
-  semiTitle: 
-  {
-    fontWeight: 'bold'
-  }
-  
 });
+
+
