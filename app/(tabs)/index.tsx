@@ -1,19 +1,51 @@
 import { ThemedText } from '@/components/themed-text';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Button, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Button, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 export default function HomeScreen() {
   const router = useRouter(); 
-  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit() {
-    console.log(nome, email, password, passwordConfirm);
-    router.push('/toDoHome');
+  async function handleSubmit() {
+    if (!email || !password) {
+      Alert.alert('Erro', 'Preencha email e senha');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post('http://localhost:3000/auth/login', {
+        email: email,
+        password: password,
+      });
+
+      const token = response.data.Authorization; // token JWT do backend
+      const userData = response.data.data;      // { id, email }
+
+      // salvar token e id no AsyncStorage
+      await AsyncStorage.setItem('@token', token);
+      await AsyncStorage.setItem('@userId', String(userData.id));
+
+      // limpar form
+      setEmail('');
+      setPassword('');
+
+      // navegar para a tela principal
+      router.push('/toDoHome');
+
+    } catch (error: any) {
+      console.error(error.response || error);
+      Alert.alert('Erro', 'Email ou senha incorretos');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -32,6 +64,7 @@ export default function HomeScreen() {
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
+          autoCapitalize="none"
         />
 
         <ThemedText style={styles.label}>Senha</ThemedText>
@@ -44,7 +77,12 @@ export default function HomeScreen() {
         />
 
         <View style={styles.buttonWrapper}>
-          <Button title="Entrar" color="#4CAF50" onPress={handleSubmit} />
+          <Button
+            title={loading ? 'Carregando...' : 'Entrar'}
+            color="#4CAF50"
+            onPress={handleSubmit}
+            disabled={loading}
+          />
         </View>
       </View>
     </ScrollView>
@@ -75,12 +113,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
   label: {
     fontWeight: 'bold',
     marginBottom: 6,
@@ -97,8 +129,6 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     marginTop: 20,
     borderRadius: 6,
-    overflow: 'hidden', 
+    overflow: 'hidden',
   },
 });
-
-

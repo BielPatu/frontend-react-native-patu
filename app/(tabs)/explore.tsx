@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Button, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+
 export default function HomeScreen() {
   const router = useRouter();
   const [nome, setNome] = useState('');
@@ -19,7 +20,7 @@ export default function HomeScreen() {
     }
     console.log(nome, email, password, passwordConfirm);
 
-    axios.post('http://localhost:3000/user', {
+    axios.post('http://localhost:3000/auth/register', {
       name: nome,
       email: email,
       password: password,

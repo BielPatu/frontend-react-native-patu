@@ -5,20 +5,35 @@ import { StyleSheet, Text, TextInput, TouchableOpacity } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function NewListModal() {
   const router = useRouter();
   const [title, setTitle] = useState("");
 
   async function handleCreateList() {
-    if (!title.trim()) {
-      return;
-    }
+    if (!title.trim()) return;
+
     try {
-      await axios.post("http://localhost:3000/to-do-list", {
-        title,
-        userId: 1, 
-      });
+      // pega ID do usuário logado
+      const userId = await AsyncStorage.getItem("@userId");
+      if (!userId) throw new Error("Usuário não logado");
+
+      const token = await AsyncStorage.getItem("@token");
+
+      await axios.post(
+        "http://localhost:3000/to-do-list",
+        {
+          title,
+          userId: Number(userId),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       console.log("Lista criada com sucesso");
       router.back();
     } catch (error) {

@@ -1,111 +1,126 @@
 import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import Checkbox from 'expo-checkbox';
 import { Link } from "expo-router";
 import * as React from 'react';
 import { useEffect, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ProgressBar } from 'react-native-paper';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function ToDoHome() {
-  const [lists, setLists] = useState([]);
-  const [name, setName] = useState();
-  const [isChecked, setChecked] = useState({});
+  const [lists, setLists] = useState<any[]>([]);
+  const [name, setName] = useState('');
+  const [isChecked, setChecked] = useState<{ [key: number]: boolean }>({});
 
   const activeQuestsCount = lists.filter(list => !isChecked[list.id]).length;
 
-  const toggleCheckbox = (id) => {
+  const toggleCheckbox = (id: number) => {
     setChecked(prevState => ({
       ...prevState,
       [id]: !prevState[id]
     }));
   };
 
-  function loadLists() {
-    axios.get('http://localhost:3000/to-do-list/')
-      .then(response => setLists(response.data))
-      .catch(error => console.error('Error fetching data:', error));
-  }
+  // Carrega nome do usuário e listas
+  async function loadUserAndLists() {
+    try {
+      const userId = await AsyncStorage.getItem('@userId');
+      const token = await AsyncStorage.getItem('@token');
 
-  function loadUser() {
-    axios.get('http://localhost:3000/user/1')
-      .then(response => setName(response.data.name))
-      .catch(error => console.error('Error fetching user:', error));
+      if (!userId || !token) return;
+
+      // Busca info do usuário
+      const userResponse = await axios.get(`http://localhost:3000/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setName(userResponse.data.name);
+
+      // Busca todas as listas e filtra apenas do usuário
+      const listsResponse = await axios.get('http://localhost:3000/to-do-list', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const userLists = listsResponse.data.filter((list: any) => list.userId === Number(userId));
+      setLists(userLists);
+
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      Alert.alert('Erro', 'Não foi possível carregar usuário ou quests.');
+    }
   }
 
   useEffect(() => {
-    loadLists();
-    loadUser();
+    loadUserAndLists();
   }, []);
 
   return (
     <SafeAreaProvider style={{ flex: 1, backgroundColor: '#0d0d0d' }}>
-  <View style={styles.profileCard}>
-    <View style={styles.profileSection}>
-      <Image
-        source={{ uri: 'https://preview.redd.it/jonkler-bom-dia-v0-l7spc07a1kqd1.jpeg?auto=webp&s=2611c954e108166dd5428e1acac95d7296693c06' }}
-        style={styles.avatar}
-      />
-      <ThemedText style={styles.userName}>{name || 'placeholder'}</ThemedText>
-    </View>
-
-    <View style={styles.statsSection}>
-      <ThemedText style={styles.sectionTitle}>⚔️ Stats</ThemedText>
-      <Text style={styles.statText}>Level: 5</Text>
-      <Text style={styles.statText}>Completion Rate: 71%</Text>
-      <ProgressBar progress={0.71} color="#4caf50" style={styles.progress} />
-    </View>
-  </View>
-
-
-
-  <View style={styles.questHeader}>
-      <Text style={styles.title}>📜 Quests</Text>
-      <ThemedText style={styles.activeQuests}>
-        Ativas: {activeQuestsCount}/{lists.length}
-      </ThemedText>
-    </View>
-
-
-
-
-    <ScrollView style={styles.questScroll} contentContainerStyle={{ paddingBottom: 20 }}>
-
-    <View style={styles.questList}>
-      {lists.map((list) => (
-        <View key={list.id} style={styles.questCard}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ marginRight: 8 }}>⚔️</Text>
-            <ThemedText style={isChecked[list.id] ? styles.questDone : styles.questTitle}>
-              {list.title}
-            </ThemedText>
-          </View>
-          <Checkbox
-            value={isChecked[list.id] || false}
-            onValueChange={() => toggleCheckbox(list.id)}
-            color={isChecked[list.id] ? '#4caf50' : '#888'}
+      <View style={styles.profileCard}>
+        <View style={styles.profileSection}>
+          <Image
+            source={{ uri: 'https://preview.redd.it/jonkler-bom-dia-v0-l7spc07a1kqd1.jpeg?auto=webp&s=2611c954e108166dd5428e1acac95d7296693c06' }}
+            style={styles.avatar}
           />
+          <ThemedText style={styles.userName}>{name || 'placeholder'}</ThemedText>
         </View>
-      ))}
-    </View>
-  </ScrollView>
+
+        <View style={styles.statsSection}>
+          <ThemedText style={styles.sectionTitle}>⚔️ Stats</ThemedText>
+          <Text style={styles.statText}>Level: 1</Text>
+          <Text style={styles.statText}>Completion Rate: 71%</Text>
+          <ProgressBar progress={0.71} color="#4caf50" style={styles.progress} />
+        </View>
+      </View>
+
+      <View style={styles.questHeader}>
+        <Text style={styles.title}>📜 Quests</Text>
+        <ThemedText style={styles.activeQuests}>
+          Ativas: {activeQuestsCount}/{lists.length}
+        </ThemedText>
+      </View>
+
+      <ScrollView style={styles.questScroll} contentContainerStyle={{ paddingBottom: 20 }}>
+        <View style={styles.questList}>
+          {lists.map((list) => (
+            <View key={list.id} style={styles.questCard}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ marginRight: 8 }}>⚔️</Text>
+                <ThemedText style={isChecked[list.id] ? styles.questDone : styles.questTitle}>
+                  {list.title}
+                </ThemedText>
+              </View>
+              <Checkbox
+                value={isChecked[list.id] || false}
+                onValueChange={() => toggleCheckbox(list.id)}
+                color={isChecked[list.id] ? '#4caf50' : '#888'}
+              />
+            </View>
+          ))}
+        </View>
+      </ScrollView>
 
       <View style={styles.footer}>
-          <Link href="/(tabs)">
-        <TouchableOpacity onPress={() => console.log("Logout")} style={styles.iconButton}>
-          <Ionicons name="log-out-outline" size={28} color="black" />
-        </TouchableOpacity>
-          </Link>
-        <Link href="(modals)/ListCreatorModal" style={[styles.iconButton, styles.centralButton]}>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="add" size={28} color="black" />
+        <Link href="/(tabs)">
+          <TouchableOpacity onPress={async () => {
+            await AsyncStorage.removeItem('@token');
+            await AsyncStorage.removeItem('@userId');
+            console.log('Logout');
+          }} style={styles.iconButton}>
+            <Ionicons name="log-out-outline" size={28} color="black" />
           </TouchableOpacity>
         </Link>
+
+        <Link href="(modals)/ListCreatorModal" style={[styles.iconButton, styles.centralButton]}>
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons name="add" size={28} color="black" />
+          </TouchableOpacity>
+        </Link>
+
         <Link href="(modals)/config" style={styles.iconButton}>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="settings-outline" size={28} color="black" />
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons name="settings-outline" size={28} color="black" />
           </TouchableOpacity>
         </Link>
       </View>
@@ -114,11 +129,6 @@ export default function ToDoHome() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#0d0d0d',
-    padding: 16,
-  },
   profileCard: {
     flexDirection: 'column',
     alignItems: 'center',
@@ -221,9 +231,9 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: "row",
-    justifyContent: "space-around", 
+    justifyContent: "space-around",
     alignItems: "center",
-    paddingVertical: 12, 
+    paddingVertical: 12,
     paddingHorizontal: 16,
     backgroundColor: "#DFFFFF",
     borderTopLeftRadius: 12,
@@ -239,7 +249,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff", 
+    backgroundColor: "#fff",
   },
   centralButton: {
     backgroundColor: "#4caf50",
@@ -248,5 +258,4 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
   }
-  
 });
